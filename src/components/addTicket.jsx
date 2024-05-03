@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function AddTicket() {
-
-    const router = useRouter()
+export default function AddTicket({ ticket, edit }) {
+  const EDITMODE = edit;
+  const router = useRouter();
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -16,20 +16,33 @@ export default function AddTicket() {
     }));
   };
 
-  const handleSubmit =async (e) => {
-    e.preventDefault()
-    const res = await fetch('/api/tickets',{
-      method: "POST",
-      headers: {
-        "Content-type": "application/json"
-      },
-        body: JSON.stringify({formData}),
-    })
-    if(!res.ok){
-        throw new Error('Faild to create ticket')
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (EDITMODE) {
+      const res = await fetch(`/api/tickets/${ticket._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({ formData }),
+      });
+      if (!res.ok) {
+        throw new Error("Faild to update ticket");
+      }
+    } else {
+      const res = await fetch("/api/tickets", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({ formData }),
+      });
+      if (!res.ok) {
+        throw new Error("Faild to create ticket");
+      }
     }
-    router.refresh()
-    router.push('/')
+    router.refresh();
+    router.push("/");
   };
 
   const ticketData = {
@@ -41,6 +54,15 @@ export default function AddTicket() {
     category: "Hardware problem",
   };
 
+  if (EDITMODE) {
+    ticketData.title = ticket.title;
+    ticketData.description = ticket.description;
+    ticketData.priority = ticket.priority;
+    ticketData.progress = ticket.progress;
+    ticketData.status = ticket.status;
+    ticketData.category = ticket.category;
+  }
+
   const [formData, setFormData] = useState(ticketData);
 
   return (
@@ -50,7 +72,7 @@ export default function AddTicket() {
         className="flex flex-col gap-3 w-1/2"
         method="POST"
       >
-        <h3>Create your ticket</h3>
+        <h3>{EDITMODE ? "Update your ticket" : "Create your ticket"}</h3>
         <label htmlFor="">Title</label>
         <input
           type="text"
@@ -127,14 +149,26 @@ export default function AddTicket() {
           <label htmlFor="">5</label>
         </div>
         <label htmlFor="">Progress</label>
-        <input type="range" id="progress" name="progress" value={formData.progress} min="0" max="100" onChange={handleChange} />
+        <input
+          type="range"
+          id="progress"
+          name="progress"
+          value={formData.progress}
+          min="0"
+          max="100"
+          onChange={handleChange}
+        />
         <label htmlFor="">Status</label>
         <select name="status" value={formData.status} onChange={handleChange}>
-            <option value="to-do">to-do</option>
-            <option value="in-progress">in-progress</option>
-            <option value="done">done</option>
+          <option value="to-do">to-do</option>
+          <option value="in-progress">in-progress</option>
+          <option value="done">done</option>
         </select>
-        <input type="submit" className="btn" value="Create ticket"/>
+        <input
+          type="submit"
+          className="btn"
+          value={EDITMODE ? "Update Ticket" : "Create Ticket"}
+        />
       </form>
     </div>
   );

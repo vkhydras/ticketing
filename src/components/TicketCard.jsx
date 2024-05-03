@@ -3,6 +3,7 @@ import DeleteBlock from "./DeleteBlock";
 import PriorityDisplay from "./PriorityDisplay";
 import ProgressBar from "./ProgressBar";
 import StatusDisplay from "./StatusDisplay";
+import Link from "next/link";
 
 export default function TicketCard({ticket}) {
   const formatTimestamp = (stamp) => {
@@ -27,6 +28,7 @@ export default function TicketCard({ticket}) {
           <DeleteBlock id = {ticket._id} />
         </div>
       </div>
+      <Link href={`/tickets/${ticket._id}`} style={{display:"contents"}}>
       <h4>{ticket.title}</h4>
       <hr className="h-px border-0 bg-page mb-2" />
       <p className="whitespace-pre-wrap">{ticket.description}</p>
@@ -41,6 +43,7 @@ export default function TicketCard({ticket}) {
         <StatusDisplay stat={ticket.status}/>
         </div>
       </div>
+      </Link>
     </div>
   );
 }
